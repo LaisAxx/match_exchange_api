@@ -175,9 +175,10 @@ Socket.IO escutando em `/` para eventos como:
 src/
 ├── auth/
 ├── common/
+ └── docs/ # swagger.yaml
 ├── orders/
 ├── user/
-└── docs/            # swagger.yaml
+           
 ```
 
 ---
