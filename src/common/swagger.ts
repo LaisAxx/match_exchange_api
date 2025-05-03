@@ -1,23 +1,9 @@
-import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
+import yaml from 'js-yaml';
 
-const options: swaggerJsdoc.Options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Match Exchange API',
-      version: '1.0.0',
-      description: 'API de matching de ordens BTC/USD',
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-      },
-    ],
-  },
-  apis: ['./src/**/*.ts'],
-};
+const filePath = path.resolve(__dirname, '../common/docs/swagger.yaml');
+const swaggerDocument = yaml.load(fs.readFileSync(filePath, 'utf8')) as object;
 
-const specs = swaggerJsdoc(options);
-
-export { swaggerUi, specs };
+export { swaggerUi, swaggerDocument };

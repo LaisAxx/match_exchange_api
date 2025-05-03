@@ -1,0 +1,240 @@
+openapi: 3.0.0
+info:
+  title: Match Exchange API
+  version: 1.0.0
+  description: API de matching de ordens BTC/USD
+servers:
+  - url: http://localhost:3001
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Endpoints de autenticação
+  - name: Orders
+    description: Operações relacionadas a ordens
+  - name: Matches
+    description: Histórico global de negociações
+
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: Autentica ou registra um usuário
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+                  example: user
+      responses:
+        200:
+          description: JWT retornado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /api/v1/orders:
+    post:
+      summary: Cria uma nova ordem de compra ou venda
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, amount, price]
+              properties:
+                type:
+                  type: string
+                  enum: [buy, sell]
+                  example: buy
+                amount:
+                  type: number
+                  example: 0.5
+                price:
+                  type: number
+                  example: 10500
+      responses:
+        201:
+          description: Ordem criada com sucesso
+        400:
+          description: Dados inválidos
+        401:
+          description: Não autorizado
+
+  /api/v1/orders/stats:
+    get:
+      summary: Retorna estatísticas de mercado e saldo do usuário
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Estatísticas retornadas com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lastPrice:
+                    type: number
+                  btcVolume:
+                    type: number
+                  usdVolume:
+                    type: number
+                  high:
+                    type: number
+                  low:
+                    type: number
+                  usdBalance:
+                    type: number
+                  btcBalance:
+                    type: number
+
+  /api/v1/orders/book:
+    get:
+      summary: Retorna o livro de ofertas (bids e asks)
+      tags: [Orders]
+      responses:
+        200:
+          description: Livro de ofertas retornado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bids:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        price:
+                          type: number
+                        amount:
+                          type: number
+                  asks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        price:
+                          type: number
+                        amount:
+                          type: number
+
+  /api/v1/orders/active:
+    get:
+      summary: Lista ordens ativas do usuário autenticado
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Lista de ordens ativas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                    amount:
+                      type: number
+                    price:
+                      type: number
+                    created_at:
+                      type: string
+
+  /api/v1/orders/history:
+    get:
+      summary: Lista o histórico de ordens do usuário
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Histórico de ordens retornado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    price:
+                      type: number
+                    amount:
+                      type: number
+                    type:
+                      type: string
+                    matched_at:
+                      type: string
+
+  /api/v1/orders/{id}:
+    delete:
+      summary: Cancela uma ordem ativa
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID da ordem a cancelar
+      responses:
+        200:
+          description: Ordem cancelada
+        404:
+          description: Ordem não encontrada
+
+  /api/v1/matches:
+    get:
+      summary: Retorna os últimos matches globais
+      tags: [Matches]
+      responses:
+        200:
+          description: Lista de matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    buyer:
+                      type: string
+                    seller:
+                      type: string
+                    price:
+                      type: number
+                    amount:
+                      type: number
+                    created_at:
+                      type: string

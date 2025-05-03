@@ -1,7 +1,22 @@
+import 'reflect-metadata';
+import { AppDataSource } from './db/data-source';
 import app from './app';
+import { initSocket } from './socket';
+import http from 'http';
 
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
+initSocket(server);
 
-app.listen(PORT, () => {
-  console.log(`🚀 Run server http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 3001;
+
+AppDataSource.initialize()
+  .then(() => {
+    console.log('✅ Banco de dados conectado com sucesso!');
+
+    server.listen(PORT, () => {
+      console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('❌ Erro ao conectar no banco de dados:', error);
+  });

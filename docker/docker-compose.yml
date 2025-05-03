@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: match_exchange_mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: match_exchange
+      MYSQL_USER: match
+      MYSQL_PASSWORD: match123
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql-data:
+
